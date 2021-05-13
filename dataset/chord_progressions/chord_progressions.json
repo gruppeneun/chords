@@ -1,0 +1,143 @@
+{
+  "II-V-I": {
+    "1": [{
+        "root": 2,
+        "bass": null,
+        "degrees": [
+          3,
+          7,
+          10
+        ]
+      }, {
+        "root": 7,
+        "bass": null,
+        "degrees": [
+          4,
+          7,
+          10
+        ]
+      }, {
+        "root": 0,
+        "bass": null,
+        "degrees": [
+          4,
+          7,
+          11
+        ]
+      }
+    ]
+  },
+  "II-subV-I": {
+    "1": [{
+        "root": 2,
+        "bass": null,
+        "degrees": [
+          3,
+          7,
+          10
+        ]
+      }, {
+        "root": 1,
+        "bass": null,
+        "degrees": [
+          4,
+          7,
+          10
+        ]
+      }, {
+        "root": 0,
+        "bass": null,
+        "degrees": [
+          4,
+          7,
+          11
+        ]
+      }
+    ]
+  },
+  "backdoor": {
+    "1": [{
+        "root": 2,
+        "bass": null,
+        "degrees": [
+          3,
+          7,
+          10
+        ]
+      }, {
+        "root": 7,
+        "bass": null,
+        "degrees": [
+          4,
+          7,
+          10
+        ]
+      }, {
+        "root": 9,
+        "bass": null,
+        "degrees": [
+          4,
+          7,
+          11
+        ]
+      }
+    ]
+  },
+  "dominants": {
+    "1": [{
+        "root": 2,
+        "bass": null,
+        "degrees": [
+          4,
+          7,
+          10
+        ]
+      }, {
+        "root": 7,
+        "bass": null,
+        "degrees": [
+          4,
+          7,
+          10
+        ]
+      }, {
+        "root": 0,
+        "bass": null,
+        "degrees": [
+          4,
+          7,
+          10
+        ]
+      }
+    ]
+  },
+  "ii-V-i": {
+    "1": [{
+        "root": 2,
+        "bass": null,
+        "degrees": [
+          3,
+          6,
+          10
+        ]
+      }, {
+        "root": 7,
+        "bass": null,
+        "degrees": [
+          4,
+          7,
+          10
+        ]
+      }, {
+        "root": 0,
+        "bass": null,
+        "degrees": [
+          3,
+          7,
+          10
+        ]
+      }
+    ]
+  }
+
+}

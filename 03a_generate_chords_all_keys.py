@@ -1,0 +1,70 @@
+from chords.chord import Chord
+from dataset.readData import ReadData
+import re
+import tqdm
+import os
+
+directory = './chord_sequences'
+if not os.path.exists(directory):
+    os.makedirs(directory)
+
+# define the object to read in the chords for the tunes
+data_obj = ReadData()
+data_obj.read_tunes()
+
+# use simplified basic chords - or full chords?
+basic_chords = False
+
+if basic_chords:
+    data, names = data_obj.rootAndDegreesBasic()
+    filename = os.path.join(directory, 'chords_basic_all_keys.txt')
+else:
+    data, names = data_obj.rootAndDegrees()
+    filename = os.path.join(directory, 'chords_full_all_keys.txt')
+
+filename_tunes = os.path.join(directory, 'tune_names_all_keys.txt')
+
+###
+# Generate Chord sequences
+
+sequences = []
+for key in tqdm.tqdm(range(0, 12)):
+    for tune in data:
+        seq = []
+        for chord in tune:
+            formatted_chord = Chord(chord).toSymbol(key=key, includeRoot=True, includeBass=False)
+            # delete all the chord extensions (+b9), (+#9), (+b11), (+#11), (+b13), (+#13)
+            formatted_chord = re.sub('\(\+[b#]?[0-9]+\)', '', formatted_chord)
+            # replace mM9 chord by mM7 because it occurs only once
+            formatted_chord = re.sub('mM9$', 'mM7', formatted_chord)
+            # replace all maug chords; they occur only once minor-augmented =
+            seq += [formatted_chord]
+            # print("Bar {}: {}".format(chord['measure'], formatted_chord))
+        sequences += [seq]
+
+###
+# Generate file with tune names
+
+tune_names = []
+for key in range(0, 12):
+    for tune in names:
+        tune_name = re.sub(r'\.xml', "", tune)
+        tune_names += [tune_name]
+
+file = open(filename_tunes, 'w')  # write to file
+for tune in tune_names:
+    file.write(f'{tune}\n')
+file.close()  # close file
+
+###
+# for each tune, remove all chords occurring multiple times in a sequence
+
+file = open(filename, 'w')  # write to file
+for tune in sequences:
+    last_chord = None
+    for chord in tune:
+        if chord != last_chord:
+            file.write(f'{chord} ')
+            last_chord = chord
+    file.write(f'\n')
+file.close()
