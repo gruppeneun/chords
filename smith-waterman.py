@@ -4,7 +4,6 @@
 import numpy as np
 import pandas as pd
 import os
-from tqdm import tqdm
 
 # read test tunes
 tunesPath = 'chord_sequences/chords_relative_full.txt'
@@ -79,7 +78,7 @@ def SmithWaterman(t1, t1_name,
                    mat[i,j-1] + gap_p, # left
                    0
                 ])
-    
+
     # check if any matches at all
     if mat.max() == 0:
         rel_score = 0
@@ -91,6 +90,8 @@ def SmithWaterman(t1, t1_name,
         ali_nrsub = 0
         ali_lm = 0
         ali_lg = 0
+        rel_score_sqrt = 0
+        scores = [0,0]
     else:
         # find indices of maximum values
         max_ind = np.where(mat == mat.max())
@@ -104,28 +105,49 @@ def SmithWaterman(t1, t1_name,
             score = curr
             ind_i = [max_ind[0][i]]
             ind_j = [max_ind[1][i]]
-            while curr != 0:
+            go = True
+            while go:
                 tmp = np.array([[0, mat[ind_i[0], ind_j[0]-1]],
                                 [mat[ind_i[0]-1, ind_j[0]], mat[ind_i[0]-1, ind_j[0]-1]]],
                                dtype=int)
+                # check if gaps result actually in decrease -> otherwise part of of different trace and set to 0              
+                if tmp[0,1] < mat[ind_i[0], ind_j[0]]:
+                    tmp[0,1] = 0
+                if tmp[1,0] < mat[ind_i[0], ind_j[0]]:
+                    tmp[1,0] = 0
                 curr = tmp.max()
                 if curr != 0:
                     score += curr
                     tmp_max_ind = np.where(tmp == tmp.max())
                     ind_i.insert(0, ind_i[0] - tmp_max_ind[0][0])
                     ind_j.insert(0, ind_j[0] - tmp_max_ind[1][0])
+                else: # check if other match coming
+                    if ind_i[0]-2 >=0 and ind_j[0]-2 >=0:
+                        if mat[ind_i[0]-2, ind_j[0]-2] != 0:
+                            score += curr
+                            ind_i.insert(0, ind_i[0] - 1)
+                            ind_j.insert(0, ind_j[0] - 1)
+                        else: 
+                            go = False
+                    else:
+                        go = False
+                    
             scores.append(score)
             traces.append([ind_i, ind_j])
-            
+
         # take longest alignment
         trace = traces[np.argmax(scores)]
-        
         # calculate some alignment scores:
         # score normalized to maximum possible score
         max_score = 0
         for i in range(1, min(len(t1), len(t2))+1):
             max_score += i*3
         rel_score = max(scores) / max_score
+        if max(scores) > 0:
+            rel_score_sqrt = np.sqrt(max(scores)) / np.sqrt(max_score)
+        else:
+            rel_score_sqrt = 0.0
+        
         # length of alignment region
         ali_len = len(trace[0])
         # longest match, gap, number of gaps, number of substitutions, number of matches
@@ -227,15 +249,21 @@ def SmithWaterman(t1, t1_name,
             t2_post = t2_post + ' ' + t
             
         full_disp = (t1_pre + t1_ali + t1_post) + '\n' + g_ali + '\n' + (t2_pre + t2_ali + t2_post)
-    
+    print(full_disp)
+    print(mat)
+    print(scores)
+    print(traces)
     return pd.DataFrame({
                 'tune1_name' : t1_name,
                 'tune1' : [t1],
                 'tune2_name' : t2_name,
                 'tune2' : [t2],
+                'score' : max(scores),
                 'alignment_score' : rel_score,
+                'alignment_score_sqrt' : rel_score_sqrt, 
                 'alignment_length' : ali_len,
                 'nr_matches' : ali_nrmatch,
+                'rel_matches': ali_nrmatch / min(len(t1), len(t2)),
                 'nr_gaps' : ali_nrgaps,
                 'nr_substitutions' : ali_nrsub,
                 'longest_match_region' : ali_lm,
@@ -244,6 +272,13 @@ def SmithWaterman(t1, t1_name,
                 'full_str' : full_disp
         })
 
+i = names.index('Bags\' Groove')
+j = names.index('Blue Monk')
+SmithWaterman(tunes[i], names[i], tunes[j], names[j],
+                                 sm_m = 3, sm_p = -3, gap_p = -2)
+
+
+'''
 res = []
 for i in range(len(tunes)-1):
     for j in range(i+1, len(tunes)):
@@ -256,3 +291,4 @@ directory = './calculations'
 if not os.path.exists(directory):
     os.makedirs(directory)
 res.to_csv(directory+'/smith_waterman.zip')
+'''
