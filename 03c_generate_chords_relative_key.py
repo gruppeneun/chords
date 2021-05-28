@@ -16,13 +16,14 @@ data_obj.read_tunes()
 basic_chords = False
 
 if basic_chords:
-    data, names = data_obj.rootAndDegreesBasic()
+    data, names = data_obj.rootAndDegreesSimplified()
     file_name = './chord_sequences/chords_relative_basic.txt'
 else:
     data, names = data_obj.rootAndDegrees()
     file_name = './chord_sequences/chords_relative_full.txt'
 
 filename_tunes = os.path.join(directory, 'tune_names.txt')
+filename_mode = os.path.join(directory, 'tune_mode.txt')
 
 # read the (musical) key and mode for each tune
 default_keys = json.load(open('dataset/keys.json'))
@@ -46,6 +47,7 @@ for key in default_keys.keys():
 # Generate Chord sequences
 
 sequences = []
+modes = []
 for i in range(len(data)):
     tune = data[i]
     seq = []
@@ -61,6 +63,7 @@ for i in range(len(data)):
         seq += [formatted_chord]
         # print("Bar {}: {}".format(chord['measure'], formatted_chord))
     sequences += [seq]
+    modes.append(mode_dict[i])
 
 ###
 # Generate file with tune names
@@ -82,3 +85,11 @@ for tune in sequences:
             last_chord = chord
     file.write(f'\n')
 file.close()
+
+###
+# Generate file with modality
+
+file = open(filename_mode, 'w')  # write to file
+for mode in modes:
+    file.write(f'{mode}\n')
+file.close()  # close file

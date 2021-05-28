@@ -16,7 +16,7 @@ data_obj.read_tunes()
 basic_chords = False
 
 if basic_chords:
-    data, names = data_obj.rootAndDegreesBasic()
+    data, names = data_obj.rootAndDegreesSimplified()
     file_name = './chord_sequences/chords_basic_default_key.txt'
 else:
     data, names = data_obj.rootAndDegrees()
