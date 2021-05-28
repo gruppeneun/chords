@@ -63,7 +63,7 @@ class ReadData():
 
         return self.readData(modifier)
 
-    def rootAndDegreesOnly7(self):
+    def rootAndDegrees7(self):
         def modifier(degrees):
             no7 = degrees[:]
             if 1 in no7: no7.remove(1)
@@ -79,3 +79,23 @@ class ReadData():
 
         return self.readData(modifier)
 
+
+    def rootAndDegreesSimplified(self):
+        """
+        Reduce 9, 11, 13 chords to 7 chords
+        Reduce aug, sus to 7 chords
+        Keep 6 chords and m7b5
+        Note: (+13) will be kept since it is the same as the 6
+        """
+        def modifier(degrees):
+            no7 = degrees[:]
+            if 1 in no7: no7.remove(1)
+            if 2 in no7: no7.remove(2)
+            if 3 not in no7 and 4 not in no7: no7 += [4]
+            if 3 in no7 and 4 in no7: no7.remove(3)
+            if 5 in no7: no7.remove(5)
+            if 8 in no7: no7.remove(8)
+            no7.sort()
+            return no7
+
+        return self.readData(modifier)
