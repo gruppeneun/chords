@@ -3,10 +3,11 @@ import json
 from chords.parseFile import parseFile
 
 ##
-# Select here whether to use the full data set or just a small sample for testing
+# read config file
+config = json.load(open('config.json'))
 
-# xmldirectory = "dataset/xml/"
-xmldirectory = "dataset/test/"
+# directory with the input xml chord files
+xmldirectory = config['xmldirectory'][config['config']['input']]
 
 ##
 #

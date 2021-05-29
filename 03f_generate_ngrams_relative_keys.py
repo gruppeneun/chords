@@ -7,28 +7,42 @@ import os
 import json
 import csv
 
-N_ngram = 2
+config = json.load(open('config.json'))
 
-directory = './chord_sequences'
+N_ngram = config['config']['N_ngrams']
+
+directory = config['config']['output_directory']
 if not os.path.exists(directory):
     os.makedirs(directory)
 
+subdir = os.path.join(directory, f"ngrams{N_ngram}")
+if not os.path.exists(subdir):
+    os.makedirs(subdir)
+
+##
 # define the object to read in the chords for the tunes
 data_obj = ReadData()
 data_obj.read_tunes()
 
 # use simplified basic chords - or full chords?
-basic_chords = False
-
-if basic_chords:
+method = f"relative_key"
+if config['config']['use_basic_chords']:
     data, names = data_obj.rootAndDegreesSimplified()
-    file_name = './chord_sequences/chords_relative_basic.txt'
+    fn = f"{config['config']['input']}_chords-basic_{method}.txt"
+    file_name = os.path.join(subdir, fn)
+
 else:
     data, names = data_obj.rootAndDegrees()
-    file_name = './chord_sequences/chords_relative_full.txt'
+    fn = f"{config['config']['input']}_chords-full_{method}.txt"
+    file_name = os.path.join(subdir, fn)
 
-filename_tunes = os.path.join(directory, 'tune_names.txt')
-filename_mode = os.path.join(directory, 'tune_mode.txt')
+filename_tunes = os.path.join(subdir, f"{config['config']['input']}_tune_names.txt")
+filename_mode = os.path.join(subdir, f"{config['config']['input']}_tune_mode.txt")
+
+# read the (musical) key and mode for each tune
+default_keys = json.load(open('dataset/keys.json'))
+
+N_ngram = config['config']['N_ngrams']
 
 # read the (musical) key and mode for each tune
 default_keys = json.load(open('dataset/keys.json'))

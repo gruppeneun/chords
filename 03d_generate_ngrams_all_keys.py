@@ -5,30 +5,38 @@ import re
 import tqdm
 import os
 import json
-import csv
 
-N_ngram = 2
+config = json.load(open('config.json'))
 
-directory = './chord_sequences'
+N_ngram = config['config']['N_ngrams']
+
+directory = config['config']['output_directory']
 if not os.path.exists(directory):
     os.makedirs(directory)
 
+subdir = os.path.join(directory, f"ngrams{N_ngram}")
+if not os.path.exists(subdir):
+    os.makedirs(subdir)
+
+##
 # define the object to read in the chords for the tunes
 data_obj = ReadData()
 data_obj.read_tunes()
 
 # use simplified basic chords - or full chords?
-basic_chords = False
-
-if basic_chords:
+method = f"all_key"
+if config['config']['use_basic_chords']:
     data, names = data_obj.rootAndDegreesSimplified()
-    filename = os.path.join(directory, 'chords_basic_all_keys.txt')
+    fn = f"{config['config']['input']}_chords-basic_{method}.txt"
+    file_name = os.path.join(subdir, fn)
 
 else:
     data, names = data_obj.rootAndDegrees()
-    filename = os.path.join(directory, 'chords_full_all_keys.txt')
+    fn = f"{config['config']['input']}_chords-full_{method}.txt"
+    file_name = os.path.join(subdir, fn)
 
-filename_tunes = os.path.join(directory, 'tune_names_all_keys.txt')
+filename_tunes = os.path.join(subdir, f"{config['config']['input']}_tune_names_{method}.txt")
+
 
 tune_names = []
 for tune in names:
@@ -120,7 +128,7 @@ file.close()  # close file
 ###
 # for each tune, remove all chords occurring multiple times in a sequence
 
-file = open(filename, 'w')  # write to file
+file = open(file_name, 'w')  # write to file
 for tune in seq_patterns:
     for chord in tune:
         file.write(f'{chord} ')

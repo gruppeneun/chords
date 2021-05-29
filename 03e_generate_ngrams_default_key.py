@@ -7,46 +7,40 @@ import os
 import json
 import csv
 
-N_ngram = 2
+config = json.load(open('config.json'))
 
-directory = './chord_sequences'
+N_ngram = config['config']['N_ngrams']
+
+directory = config['config']['output_directory']
 if not os.path.exists(directory):
     os.makedirs(directory)
 
+subdir = os.path.join(directory, f"ngrams{N_ngram}")
+if not os.path.exists(subdir):
+    os.makedirs(subdir)
+
+##
 # define the object to read in the chords for the tunes
 data_obj = ReadData()
 data_obj.read_tunes()
 
 # use simplified basic chords - or full chords?
-basic_chords = False
-
-if basic_chords:
+method = f"default_key"
+if config['config']['use_basic_chords']:
     data, names = data_obj.rootAndDegreesSimplified()
-    file_name = './chord_sequences/chords_default_basic.txt'
+    fn = f"{config['config']['input']}_chords-basic_{method}.txt"
+    file_name = os.path.join(subdir, fn)
+
 else:
     data, names = data_obj.rootAndDegrees()
-    file_name = './chord_sequences/chords_default_full.txt'
+    fn = f"{config['config']['input']}_chords-full_{method}.txt"
+    file_name = os.path.join(subdir, fn)
 
-filename_tunes = os.path.join(directory, 'tune_names.txt')
-filename_mode = os.path.join(directory, 'tune_mode.txt')
+filename_tunes = os.path.join(subdir, f"{config['config']['input']}_tune_names.txt")
+filename_mode = os.path.join(subdir, f"{config['config']['input']}_tune_mode.txt")
 
 # read the (musical) key and mode for each tune
 default_keys = json.load(open('dataset/keys.json'))
-
-##
-# index the name of the tunes to be able to match them to the generated chord sequences
-name_dict = {}
-i = 0
-for key in default_keys.keys():
-    name_dict[i] = key
-    i += 1
-
-# index the modality of the tunes to be able to match them to the generated chord sequences
-mode_dict = {}
-i = 0
-for key in default_keys.keys():
-    mode_dict[i] = default_keys[key]['mode']
-    i += 1
 
 
 ##
@@ -65,6 +59,14 @@ mode_dict = {}
 i = 0
 for key in default_keys.keys():
     mode_dict[i] = default_keys[key]['mode']
+    i += 1
+
+##
+# index the keys dict to be able to match them to the generated chord sequences
+inv_dict = {}
+i = 0
+for key in default_keys.keys():
+    inv_dict[i] = key
     i += 1
 
 ###
@@ -76,9 +78,9 @@ for i in range(len(data)):
     tune = data[i]
     seq = []
     # transpose a major tune to C major, and a minor tune to A minor
-    key = 3 if mode_dict[i] == 'major' else 0
     for chord in tune:
-        formatted_chord = Chord(chord).toSymbol(key=key, keyLess=False, includeRoot=True, includeBass=False)
+        formatted_chord = Chord(chord).toSymbol(key=default_keys[inv_dict[i]]['key'],
+                                                keyLess=False, includeRoot=True, includeBass=False)
         # delete all the chord extensions (+b9), (+#9), (+b11), (+#11), (+b13), (+#13)
         formatted_chord = re.sub('\(\+[b#]?[0-9]+\)', '', formatted_chord)
         # replace mM9 chord by mM7 because it occurs only once

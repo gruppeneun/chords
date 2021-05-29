@@ -5,26 +5,37 @@ import tqdm
 import os
 import json
 
-directory = './chord_sequences'
+##
+# read config file
+config = json.load(open('config.json'))
+
+directory = config['config']['output_directory']
 if not os.path.exists(directory):
     os.makedirs(directory)
 
+subdir = os.path.join(directory, 'chords')
+if not os.path.exists(subdir):
+    os.makedirs(subdir)
+
+
+##
 # define the object to read in the chords for the tunes
 data_obj = ReadData()
 data_obj.read_tunes()
 
 # use simplified basic chords - or full chords?
-basic_chords = False
-
-if basic_chords:
+method = 'all_keys'
+if config['config']['use_basic_chords']:
     data, names = data_obj.rootAndDegreesSimplified()
-    filename = os.path.join(directory, 'chords_basic_all_keys.txt')
+    fn = f"{config['config']['input']}_chords-basic_{method}.txt"
+    filename = os.path.join(subdir, fn)
 
 else:
     data, names = data_obj.rootAndDegrees()
-    filename = os.path.join(directory, 'chords_full_all_keys.txt')
+    fn = f"{config['config']['input']}_chords-full_{method}.txt"
+    filename = os.path.join(subdir, fn)
 
-filename_tunes = os.path.join(directory, 'tune_names_all_keys.txt')
+filename_tunes = os.path.join(subdir, f"{config['config']['input']}_tune_names_{method}.txt")
 
 tune_names = []
 for tune in names:
