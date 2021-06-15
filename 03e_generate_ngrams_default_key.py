@@ -47,13 +47,6 @@ default_keys = json.load(open('dataset/keys.json'))
 # read the (musical) key and mode for each tune
 default_keys = json.load(open('dataset/keys.json'))
 
-# index the name of the tunes to be able to match them to the generated chord sequences
-name_dict = {}
-i = 0
-for key in default_keys.keys():
-    name_dict[i] = key
-    i += 1
-
 # index the modality of the tunes to be able to match them to the generated chord sequences
 mode_dict = {}
 i = 0
