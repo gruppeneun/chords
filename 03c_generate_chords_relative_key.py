@@ -33,16 +33,21 @@ else:
 
 filename_tunes = os.path.join(subdir, f"{config['config']['input']}_tune_names.txt")
 filename_mode = os.path.join(subdir, f"{config['config']['input']}_tune_mode.txt")
+filename_composer = os.path.join(subdir, f"{config['config']['input']}_composer.txt")
 
 # read the (musical) key and mode for each tune
 default_keys = json.load(open('dataset/keys.json'))
 
+# read the composer for each tune
+composers = json.load(open('dataset/composers.json'))
+
+
 ##
-# index the name of the tunes to be able to match them to the generated chord sequences
-name_dict = {}
+# index the composers of the tunes to be able to match them to the generated chord sequences
+composer_dict = {}
 i = 0
-for key in default_keys.keys():
-    name_dict[i] = key
+for composer in composers.values():
+    composer_dict[i] = composer
     i += 1
 
 # index the modality of the tunes to be able to match them to the generated chord sequences
@@ -57,6 +62,7 @@ for key in default_keys.keys():
 
 sequences = []
 modes = []
+composers = []
 for i in range(len(data)):
     tune = data[i]
     seq = []
@@ -73,6 +79,7 @@ for i in range(len(data)):
         # print("Bar {}: {}".format(chord['measure'], formatted_chord))
     sequences += [seq]
     modes.append(mode_dict[i])
+    composers.append(composer_dict[i])
 
 ###
 # Generate file with tune names
@@ -101,4 +108,12 @@ file.close()
 file = open(filename_mode, 'w')  # write to file
 for mode in modes:
     file.write(f'{mode}\n')
+file.close()  # close file
+
+###
+# Generate file with composer
+
+file = open(filename_composer, 'w')  # write to file
+for composer in composers:
+    file.write(f'{composer}\n')
 file.close()  # close file
