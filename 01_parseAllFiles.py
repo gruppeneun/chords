@@ -7,7 +7,7 @@ from chords.parseFile import parseFile
 config = json.load(open('config.json'))
 
 # read directory names containing the MusicXML input files
-xmldirectories = config['config']['input']
+xmldirectories = config['xmldirectory'][config['config']['input']]
 
 ##
 #
