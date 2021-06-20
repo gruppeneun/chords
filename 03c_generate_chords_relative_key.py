@@ -4,35 +4,50 @@ import json
 import re
 import os
 
-directory = './chord_sequences'
+config = json.load(open('config.json'))
+
+directory = config['config']['output_directory']
 if not os.path.exists(directory):
     os.makedirs(directory)
 
+subdir = os.path.join(directory, 'chords')
+if not os.path.exists(subdir):
+    os.makedirs(subdir)
+
+##
 # define the object to read in the chords for the tunes
 data_obj = ReadData()
 data_obj.read_tunes()
 
 # use simplified basic chords - or full chords?
-basic_chords = False
+method = 'relative_key'
+if config['config']['use_basic_chords']:
+    data, names = data_obj.rootAndDegreesSimplified()
+    fn = f"{config['config']['input']}_chords-basic_{method}.txt"
+    file_name = os.path.join(subdir, fn)
 
-if basic_chords:
-    data, names = data_obj.rootAndDegreesBasic()
-    file_name = './chord_sequences/chords_relative_basic.txt'
 else:
     data, names = data_obj.rootAndDegrees()
-    file_name = './chord_sequences/chords_relative_full.txt'
+    fn = f"{config['config']['input']}_chords-full_{method}.txt"
+    file_name = os.path.join(subdir, fn)
 
-filename_tunes = os.path.join(directory, 'tune_names.txt')
+filename_tunes = os.path.join(subdir, f"{config['config']['input']}_tune_names.txt")
+filename_mode = os.path.join(subdir, f"{config['config']['input']}_tune_mode.txt")
+filename_composer = os.path.join(subdir, f"{config['config']['input']}_composer.txt")
 
 # read the (musical) key and mode for each tune
 default_keys = json.load(open('dataset/keys.json'))
 
+# read the composer for each tune
+composers = json.load(open('dataset/composers.json'))
+
+
 ##
-# index the name of the tunes to be able to match them to the generated chord sequences
-name_dict = {}
+# index the composers of the tunes to be able to match them to the generated chord sequences
+composer_dict = {}
 i = 0
-for key in default_keys.keys():
-    name_dict[i] = key
+for composer in composers.values():
+    composer_dict[i] = composer
     i += 1
 
 # index the modality of the tunes to be able to match them to the generated chord sequences
@@ -46,6 +61,8 @@ for key in default_keys.keys():
 # Generate Chord sequences
 
 sequences = []
+modes = []
+composers = []
 for i in range(len(data)):
     tune = data[i]
     seq = []
@@ -61,6 +78,8 @@ for i in range(len(data)):
         seq += [formatted_chord]
         # print("Bar {}: {}".format(chord['measure'], formatted_chord))
     sequences += [seq]
+    modes.append(mode_dict[i])
+    composers.append(composer_dict[i])
 
 ###
 # Generate file with tune names
@@ -82,3 +101,19 @@ for tune in sequences:
             last_chord = chord
     file.write(f'\n')
 file.close()
+
+###
+# Generate file with modality
+
+file = open(filename_mode, 'w')  # write to file
+for mode in modes:
+    file.write(f'{mode}\n')
+file.close()  # close file
+
+###
+# Generate file with composer
+
+file = open(filename_composer, 'w')  # write to file
+for composer in composers:
+    file.write(f'{composer}\n')
+file.close()  # close file

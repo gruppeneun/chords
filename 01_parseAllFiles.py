@@ -3,22 +3,28 @@ import json
 from chords.parseFile import parseFile
 
 ##
-# Select here whether to use the full data set or just a small sample for testing
+# read config file
+config = json.load(open('config.json'))
 
-# xmldirectory = "dataset/xml/"
-xmldirectory = "dataset/test/"
+# read directory names containing the MusicXML input files
+xmldirectories = config['xmldirectory'][config['config']['input']]
 
 ##
 #
-files = os.listdir(xmldirectory)
+files = []
+for directory in xmldirectories:
+    for file in os.listdir(directory):
+        files.append(os.path.join(directory, file))
 
-# json object that will be saved into file
+print(f'Found {len(files)} files to parse... ')
+
+# parse the MusicXML files and generate a json object with the chords information
 out = {}
 composers = {}
 keys = {}
 for file in files:
     print(file)
-    out[file], key, mode, composer = parseFile(xmldirectory + file)
+    out[file], key, mode, composer = parseFile(file)
     composers[file] = composer
     keys[file] = {'key': key,
                   'mode': mode}
