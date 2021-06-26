@@ -80,11 +80,21 @@ file.close()  # close file
 # for each tune, remove all chords occurring multiple times in a sequence
 
 file = open(filename, 'w')  # write to file
-for tune in sequences_all:
-    last_chord = None
-    for chord in tune:
-        if chord != last_chord:
+
+if config['config']['reduce_consecutive_chords']:
+    for tune in sequences:
+        last_chord = None
+        for chord in tune:
+            if chord != last_chord:
+                file.write(f'{chord} ')
+                last_chord = chord
+        file.write(f'\n')
+else:
+    for tune in sequences:
+        last_chord = None
+        for chord in tune:
             file.write(f'{chord} ')
             last_chord = chord
-    file.write(f'\n')
+        file.write(f'\n')
+
 file.close()

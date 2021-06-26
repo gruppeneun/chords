@@ -25,11 +25,11 @@ if config['config']['use_basic_chords']:
     data, names = data_obj.rootAndDegreesSimplified()
     fn = f"{config['config']['input']}_chords-basic_{method}.txt"
     file_name = os.path.join(subdir, fn)
-
 else:
     data, names = data_obj.rootAndDegrees()
     fn = f"{config['config']['input']}_chords-full_{method}.txt"
     file_name = os.path.join(subdir, fn)
+
 
 filename_tunes = os.path.join(subdir, f"{config['config']['input']}_tune_names.txt")
 filename_mode = os.path.join(subdir, f"{config['config']['input']}_tune_mode.txt")
@@ -93,13 +93,23 @@ file.close()  # close file
 # for each tune, remove all chords occurring multiple times in a sequence
 
 file = open(file_name, 'w')  # write to file
-for tune in sequences:
-    last_chord = None
-    for chord in tune:
-        if chord != last_chord:
+
+if config['config']['reduce_consecutive_chords']:
+    for tune in sequences:
+        last_chord = None
+        for chord in tune:
+            if chord != last_chord:
+                file.write(f'{chord} ')
+                last_chord = chord
+        file.write(f'\n')
+else:
+    for tune in sequences:
+        last_chord = None
+        for chord in tune:
             file.write(f'{chord} ')
             last_chord = chord
-    file.write(f'\n')
+        file.write(f'\n')
+
 file.close()
 
 ###
