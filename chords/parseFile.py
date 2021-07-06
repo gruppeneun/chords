@@ -33,9 +33,11 @@ def parseFile(file):
     mode = getChild(key, "mode").text
 
     out = {}
+    sections = {}
     repeat_from = None
     ending1 = None
     measure_num_real = 0
+    find_section = None
 
     # loop over all bars
     for measure in part1:
@@ -47,8 +49,17 @@ def parseFile(file):
 
         out[measure_num_real], keynumber = get_chords(measure=measure, key=key)
 
-        # handle repetitions
         for elem in measure.getchildren():
+
+            # find section indicators A, B, C etc ('Rehearsal' xml tag)
+            find_direction = elem.find('direction-type')
+            if find_direction is not None:
+                find_section = find_direction.find('rehearsal')
+                if find_section is not None:
+                    print(f"Bar {measure_num_real}, Section {find_section.text}")
+                    sections[measure_num_real] = find_section.text
+
+            # handle repetitions
             # print(f'    {elem}')
             # search for first or second endings
             find_ending = elem.find('ending')
@@ -74,8 +85,12 @@ def parseFile(file):
                     for i in range(repeat_from, repeat_end):
                         measure_num_real += 1
                         out[measure_num_real] = out[i]
+                        if i in sections.keys():
+                            print(f"Bar {measure_num_real}, Section {sections[i]}")
+                            sections[measure_num_real] = sections[i]
 
+                    find_section = None
                     repeat_from = None
                     ending1 = None
 
-    return out, keynumber, mode, composer
+    return out, keynumber, mode, composer, sections
