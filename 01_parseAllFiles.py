@@ -22,19 +22,29 @@ print(f'Found {len(files)} files to parse... ')
 out = {}
 composers = {}
 keys = {}
+meta_info = {}
+
 for file in files:
     print(file)
-    out[file], key, mode, composer = parseFile(file)
+    out[file], key, mode, composer, sections, num_bars = parseFile(file)
     composers[file] = composer
     keys[file] = {'key': key,
                   'mode': mode}
+    meta_info[file] = {'title': os.path.splitext(os.path.basename(file))[0],
+                      'default_key': {'key': key,
+                                      'mode': mode
+                                      },
+                      'composer': composer,
+                      'sections': sections,
+                      'num_bars': num_bars
+                      }
 
 f = open("dataset/chords.json", "w")
 f.write(json.dumps(out, indent=2))
 f.close()
 
-f = open("dataset/composers.json", "w")
-f.write(json.dumps(composers, indent=2))
+f = open("dataset/meta_info.json", "w")
+f.write(json.dumps(meta_info, indent=2))
 f.close()
 
 f = open("dataset/keys.json", "w")

@@ -1,13 +1,14 @@
 {
   "xmldirectory": {
     "full": ["dataset/xml/", "dataset/xml2"],
-    "sample": ["dataset/RossanoTunes/"],
-    "test": ["dataset/test/"]
+    "sample": ["dataset/sample_tunes/"],
+    "test": ["dataset/test2/"]
   },
   "config": {
     "input": "full",
 	"use_basic_chords": false,
-	"N_ngrams": 3,
+    "reduce_consecutive_chords": true,
+	"N_ngrams": 4,
     "output_directory": "./chord_sequences"
   }
 }

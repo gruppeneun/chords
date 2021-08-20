@@ -101,15 +101,18 @@ for i in range(len(data)):
 # for each tune, remove all chords occurring multiple times in a sequence
 seq_unique = []
 tune_unique_chords = []
-for tune in tqdm.tqdm(sequences):
-    tune_unique_chords = []
-    last_chord = None
-    for chord in tune:
-        if chord != last_chord:
-            tune_unique_chords.append(chord)
-            last_chord = chord
-    seq_unique.append(tune_unique_chords)
 
+if config['config']['reduce_consecutive_chords']:
+    for tune in tqdm.tqdm(sequences):
+        tune_unique_chords = []
+        last_chord = None
+        for chord in tune:
+            if chord != last_chord:
+                tune_unique_chords.append(chord)
+                last_chord = chord
+        seq_unique.append(tune_unique_chords)
+else:
+    seq_unique = sequences
 
 ##
 #

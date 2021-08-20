@@ -25,37 +25,29 @@ if config['config']['use_basic_chords']:
     data, names = data_obj.rootAndDegreesSimplified()
     fn = f"{config['config']['input']}_chords-basic_{method}.txt"
     file_name = os.path.join(subdir, fn)
-
 else:
     data, names = data_obj.rootAndDegrees()
     fn = f"{config['config']['input']}_chords-full_{method}.txt"
     file_name = os.path.join(subdir, fn)
 
+
 filename_tunes = os.path.join(subdir, f"{config['config']['input']}_tune_names.txt")
 filename_mode = os.path.join(subdir, f"{config['config']['input']}_tune_mode.txt")
 filename_composer = os.path.join(subdir, f"{config['config']['input']}_composer.txt")
 
-# read the (musical) key and mode for each tune
-default_keys = json.load(open('dataset/keys.json'))
-
-# read the composer for each tune
-composers = json.load(open('dataset/composers.json'))
 
 
 ##
-# index the composers of the tunes to be able to match them to the generated chord sequences
-composer_dict = {}
+# read the meta information with key mode, composer, sections
+meta_info = json.load(open('dataset/meta_info.json'))
+
+# index the meta_info of the tunes to be able to match them to the generated chord sequences
+meta_dict = {}
 i = 0
-for composer in composers.values():
-    composer_dict[i] = composer
+for tune in meta_info.keys():
+    meta_dict[i] = meta_info[tune]
     i += 1
 
-# index the modality of the tunes to be able to match them to the generated chord sequences
-mode_dict = {}
-i = 0
-for key in default_keys.keys():
-    mode_dict[i] = default_keys[key]['mode']
-    i += 1
 
 ###
 # Generate Chord sequences
@@ -67,7 +59,7 @@ for i in range(len(data)):
     tune = data[i]
     seq = []
     # transpose a major tune to C major, and a minor tune to A minor
-    key = 3 if mode_dict[i] == 'major' else 0
+    key = 3 if meta_dict[i]['default_key']['mode'] == 'major' else 0
     for chord in tune:
         formatted_chord = Chord(chord).toSymbol(key=key, keyLess=False, includeRoot=True, includeBass=False)
         # delete all the chord extensions (+b9), (+#9), (+b11), (+#11), (+b13), (+#13)
@@ -78,12 +70,11 @@ for i in range(len(data)):
         seq += [formatted_chord]
         # print("Bar {}: {}".format(chord['measure'], formatted_chord))
     sequences += [seq]
-    modes.append(mode_dict[i])
-    composers.append(composer_dict[i])
+    modes.append(meta_dict[i]['default_key']['mode'])
+    composers.append(meta_dict[i]['composer'])
 
 ###
 # Generate file with tune names
-
 file = open(filename_tunes, 'w')  # write to file
 for tune in names:
     file.write(f'{tune}\n')
@@ -93,13 +84,23 @@ file.close()  # close file
 # for each tune, remove all chords occurring multiple times in a sequence
 
 file = open(file_name, 'w')  # write to file
-for tune in sequences:
-    last_chord = None
-    for chord in tune:
-        if chord != last_chord:
+
+if config['config']['reduce_consecutive_chords']:
+    for tune in sequences:
+        last_chord = None
+        for chord in tune:
+            if chord != last_chord:
+                file.write(f'{chord} ')
+                last_chord = chord
+        file.write(f'\n')
+else:
+    for tune in sequences:
+        last_chord = None
+        for chord in tune:
             file.write(f'{chord} ')
             last_chord = chord
-    file.write(f'\n')
+        file.write(f'\n')
+
 file.close()
 
 ###
