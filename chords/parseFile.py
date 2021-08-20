@@ -93,4 +93,4 @@ def parseFile(file):
                     repeat_from = None
                     ending1 = None
 
-    return out, keynumber, mode, composer, sections
+    return out, keynumber, mode, composer, sections, measure_num_real

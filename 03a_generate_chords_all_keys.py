@@ -82,7 +82,7 @@ file.close()  # close file
 file = open(filename, 'w')  # write to file
 
 if config['config']['reduce_consecutive_chords']:
-    for tune in sequences:
+    for tune in sequences_all:
         last_chord = None
         for chord in tune:
             if chord != last_chord:
@@ -90,7 +90,7 @@ if config['config']['reduce_consecutive_chords']:
                 last_chord = chord
         file.write(f'\n')
 else:
-    for tune in sequences:
+    for tune in sequences_all:
         last_chord = None
         for chord in tune:
             file.write(f'{chord} ')
